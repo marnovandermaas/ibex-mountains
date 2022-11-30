@@ -13,7 +13,7 @@ module top_artya7 (
   output logic [11:0] RGB_LED,
   output              UART_TX
 );
-  parameter              SRAMInitFile = "";
+  parameter SRAMInitFile = "";
 
   logic clk_sys, rst_sys_n;
 
@@ -33,10 +33,11 @@ module top_artya7 (
   );
 
   always_ff @(posedge clk_sys) begin
-    LED[0] <= BTN[0] ? 1'b0 : ibex_led[0];
+    LED[0] <= BTN[0];
     LED[1] <= BTN[1] ? 1'b0 : ibex_led[1];
     LED[2] <= BTN[2] ? 1'b0 : ibex_led[2];
-    LED[3] <= BTN[3] ? 1'b0 : ibex_led[3];
+    LED[3] <=  SW[3];
+    RGB_LED <= ibex_rgb_led;
   end
 
   // Generating the system clock and reset for the FPGA.
