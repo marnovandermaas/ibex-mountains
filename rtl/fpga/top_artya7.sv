@@ -7,19 +7,20 @@ module top_artya7 (
   // These inputs are defined in data/pins_artya7.xdc
   input               IO_CLK,
   input               IO_RST_N,
-  input  [3:0]        SW,
-  input  [3:0]        BTN,
-  output logic [3:0]  LED,
-  output [11:0]       RGB_LED,
+  input         [3:0] SW,
+  input         [3:0] BTN,
+  output logic  [3:0] LED,
+  output logic [11:0] RGB_LED,
   output              UART_TX
 );
   parameter              SRAMInitFile = "";
 
   logic clk_sys, rst_sys_n;
 
-  // Instantiating the Ibex Demo System.
-  logic [3:0] dummy_led;
+  logic  [3:0] ibex_led;
+  logic [11:0] ibex_rgb_led;
 
+  // Instantiating the Ibex Demo System.
   ibex_demo_system #(
     .GpoWidth(16),
     .SRAMInitFile(SRAMInitFile)
@@ -27,15 +28,15 @@ module top_artya7 (
     .clk_sys_i(clk_sys),
     .rst_sys_ni(rst_sys_n),
 
-    .gp_o({dummy_led, RGB_LED}),
+    .gp_o({ibex_led, ibex_rgb_led}),
     .uart_tx_o(UART_TX)
   );
 
   always_ff @(posedge clk_sys) begin
-    LED[0] <= BTN[0];
-    LED[1] <= BTN[1];
-    LED[2] <= BTN[2];
-    LED[3] <= BTN[3];
+    LED[0] <= BTN[0] ? 1'b0 : ibex_led[0];
+    LED[1] <= BTN[1] ? 1'b0 : ibex_led[1];
+    LED[2] <= BTN[2] ? 1'b0 : ibex_led[2];
+    LED[3] <= BTN[3] ? 1'b0 : ibex_led[3];
   end
 
   // Generating the system clock and reset for the FPGA.
