@@ -34,16 +34,15 @@ module top_artya7 (
     .uart_tx_o(UART_TX)
   );
 
-  for (genvar i = 0; i < 11; i = i+3) begin : gen_pwm
+  for (genvar i = 0; i < 12; i++) begin : gen_pwm
     pwm #(
-      .CtrSize(8),
-      .IOLength(3)
+      .CtrSize(8)
     ) u_pwm (
       .clk_sys_i(clk_sys),
       .rst_sys_ni(rst_sys_n),
       .pulse_width_i({4'b0000, SW}),
-      .unmodulated_i(ibex_rgb_led[i+2:i+0]),
-      .modulated_o(RGB_LED[i+2:i+0])
+      .max_counter_i(8'b11111111),
+      .modulated_o(RGB_LED[i])
     );
   end : gen_pwm
 
