@@ -22,8 +22,7 @@ module pwm #(
       modulated_o <= 'b0;
     end else begin
       counter <= counter + 1;
-      //TODO should be >=
-      if (pulse_width_i > counter) begin
+      if (pulse_width_i >= counter) begin
         modulated_o <= unmodulated_i;
       end else begin
         modulated_o <= 'b0;
