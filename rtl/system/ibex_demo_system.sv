@@ -12,12 +12,15 @@
 // - Debug module.
 module ibex_demo_system #(
   parameter int GpoWidth     = 16,
+  parameter int PwmWidth     = 12,
   parameter     SRAMInitFile = ""
 ) (
   input logic                 clk_sys_i,
   input logic                 rst_sys_ni,
+  input logic [3:0]           sw_i,
 
   output logic [GpoWidth-1:0] gp_o,
+  output logic [PwmWidth-1:0] pwm_o,
   output logic                uart_tx_o
 );
   localparam logic [31:0] MEM_SIZE     = 64 * 1024; // 64 kB
@@ -279,6 +282,18 @@ module ibex_demo_system #(
 
     .gp_o
   );
+
+  for (genvar i = 0; i < PwmWidth; i++) begin : gen_pwm
+    pwm #(
+      .CtrSize(8)
+    ) u_pwm (
+      .clk_sys_i(clk_sys_i),
+      .rst_sys_ni(rst_sys_ni),
+      .pulse_width_i({4'b0000, sw_i}),
+      .max_counter_i(8'b11111111),
+      .modulated_o(pwm_o[i])
+    );
+  end : gen_pwm
 
   uart #(
     .ClockFrequency ( 50_000_000 )
