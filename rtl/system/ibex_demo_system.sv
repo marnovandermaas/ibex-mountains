@@ -201,9 +201,9 @@ module ibex_demo_system #(
      .clk_i                 (clk_sys_i),
      .rst_ni                (rst_core_n),
 
-     .test_en_i             ('b0),
+     .test_en_i             (1'b0),
      .scan_rst_ni           (1'b1),
-     .ram_cfg_i             ('b0),
+     .ram_cfg_i             (10'b0),
 
      .hart_id_i             (32'b0),
      // First instruction executed is at 0x0 + 0x80
@@ -214,7 +214,7 @@ module ibex_demo_system #(
      .instr_rvalid_i        (core_instr_rvalid),
      .instr_addr_o          (core_instr_addr),
      .instr_rdata_i         (core_instr_rdata),
-     .instr_err_i           ('b0),
+     .instr_err_i           (1'b0),
 
      .data_req_o            (host_req[CoreD]),
      .data_gnt_i            (host_gnt[CoreD]),
