@@ -18,33 +18,23 @@ module top_artya7 (
   logic clk_sys, rst_sys_n;
 
   logic  [3:0] ibex_led;
-  logic [11:0] ibex_rgb_led;
 
   // Instantiating the Ibex Demo System.
   ibex_demo_system #(
-    .GpoWidth(16),
+    .GpoWidth(4),
+    .PwmWidth(12),
     .SRAMInitFile(SRAMInitFile)
   ) u_ibex_demo_system (
     //input
     .clk_sys_i(clk_sys),
     .rst_sys_ni(rst_sys_n),
+    .sw_i(SW),
 
     //output
-    .gp_o({ibex_led, ibex_rgb_led}),
+    .gp_o(ibex_led),
+    .pwm_o(RGB_LED),
     .uart_tx_o(UART_TX)
   );
-
-  for (genvar i = 0; i < 12; i++) begin : gen_pwm
-    pwm #(
-      .CtrSize(8)
-    ) u_pwm (
-      .clk_sys_i(clk_sys),
-      .rst_sys_ni(rst_sys_n),
-      .pulse_width_i({4'b0000, SW}),
-      .max_counter_i(8'b11111111),
-      .modulated_o(RGB_LED[i])
-    );
-  end : gen_pwm
 
   always_ff @(posedge clk_sys) begin
     LED <= BTN ^ ibex_led;
