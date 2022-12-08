@@ -51,8 +51,8 @@ module ibex_demo_system #(
 
   // debug functionality is optional
   localparam bit DBG = 1;
-  localparam int unsigned DbgHwBreakNum = (DBG == 1) ? 2 : 0;
-  localparam bit DbgTriggerEn = (DBG == 1) ? 1'b1 : 1'b0;
+  localparam int unsigned DbgHwBreakNum = (DBG == 1) ?    2 :    0;
+  localparam bit          DbgTriggerEn  = (DBG == 1) ? 1'b1 : 1'b0;
 
   typedef enum int {
     CoreD,
