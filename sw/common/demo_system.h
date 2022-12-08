@@ -18,6 +18,8 @@
 
 #define TIMER_BASE 0x80002000
 
+#define PWM_BASE   0x80003000
+
 /**
  * Writes character to default UART. Signature matches c stdlib function
  * of the same name.
