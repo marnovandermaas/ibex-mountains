@@ -43,6 +43,12 @@ module ibex_demo_system #(
   localparam logic [31:0] TIMER_START  = 32'h80002000;
   localparam logic [31:0] TIMER_MASK   = ~(TIMER_SIZE-1);
 
+  // Pulse width modulator parameters
+  localparam logic [31:0] PWM_SIZE     =  4 * 1024; //  4 kiB
+  localparam logic [31:0] PWM_START    = 32'h80003000;
+  localparam logic [31:0] PWM_MASK     = ~(PWM_SIZE-1);
+  localparam int PwmCtrSize = 8;
+
   // debug functionality is optional
   localparam bit DBG = 1;
   localparam int unsigned DbgHwBreakNum = (DBG == 1) ? 2 : 0;
@@ -56,12 +62,13 @@ module ibex_demo_system #(
   typedef enum int {
     Ram,
     Gpio,
+    Pwm,
     Uart,
     Timer,
     DbgDev
   } bus_device_e;
 
-  localparam int NrDevices = DBG ? 5 : 4;
+  localparam int NrDevices = DBG ? 6 : 5;
   localparam int NrHosts = DBG ? 2 : 1;
 
   // interrupts
@@ -112,7 +119,6 @@ module ibex_demo_system #(
   logic        ndmreset_req;
   logic        dm_debug_req;
 
-
   // Device address mapping
   logic [31:0] cfg_device_addr_base [NrDevices];
   logic [31:0] cfg_device_addr_mask [NrDevices];
@@ -121,6 +127,8 @@ module ibex_demo_system #(
   assign cfg_device_addr_mask[Ram]    = MEM_MASK;
   assign cfg_device_addr_base[Gpio]   = GPIO_START;
   assign cfg_device_addr_mask[Gpio]   = GPIO_MASK;
+  assign cfg_device_addr_base[Pwm]    = PWM_START;
+  assign cfg_device_addr_mask[Pwm]    = PWM_MASK;
   assign cfg_device_addr_base[Uart]   = UART_START;
   assign cfg_device_addr_mask[Uart]   = UART_MASK;
   assign cfg_device_addr_base[Timer]  = TIMER_START;
@@ -133,8 +141,9 @@ module ibex_demo_system #(
   end
 
   // Tie-off unused error signals
-  assign device_err[Ram] = 1'b0;
+  assign device_err[Ram]  = 1'b0;
   assign device_err[Gpio] = 1'b0;
+  assign device_err[Pwm]  = 1'b0;
   assign device_err[Uart] = 1'b0;
 
   bus #(
