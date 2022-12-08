@@ -298,15 +298,23 @@ module ibex_demo_system #(
     logic [PwmCtrSize-1:0] counter_q;
     logic [PwmCtrSize-1:0] pulse_width_d;
     logic [PwmCtrSize-1:0] pulse_width_q;
-    assign counter_d = 8'b11111111;
-    assign pulse_width_d = {4'b0000, sw_i};
+    logic pwm_en;
+
+    // Byte enables are currently unsupported for PWM.
+    assign counter_d     = device_wdata[Pwm][PwmCtrSize-1+16:16]; // LSB is 16.
+    assign pulse_width_d = device_wdata[Pwm][PwmCtrSize-1+ 0: 0]; // LSB is  0.
+
+    assign pwm_en = device_req[Pwm] & device_we[Pwm] & (device_addr[Pwm][9:0] == (i * 4));
+
     always @(posedge clk_sys_i or negedge rst_sys_ni) begin
       if (!rst_sys_ni) begin
-        counter_q     <= '0;
-        pulse_width_q <= '0;
+        counter_q          <= '0;
+        pulse_width_q      <= '0;
       end else begin
-        counter_q <= counter_d;
-        pulse_width_q <= pulse_width_d;
+        if (pwm_en) begin
+          counter_q          <= counter_d;
+          pulse_width_q      <= pulse_width_d;
+        end
       end
     end
     pwm #(
@@ -320,8 +328,15 @@ module ibex_demo_system #(
     );
   end : gen_pwm
   // Reading from PWM currently not possible.
-  assign device_rvalid[Pwm] = 1'b0;
-  assign device_rdata[Pwm]  = 32'b0;
+  assign device_rdata[Pwm] = 32'b0;
+  always @(posedge clk_sys_i or negedge rst_sys_ni) begin
+    if (!rst_sys_ni) begin
+      device_rvalid[Pwm] <= 1'b0;
+    end else begin
+      // TODO only set rvalid if rdata was valid.
+      device_rvalid[Pwm] <= device_req[Pwm];
+    end
+  end
 
   uart #(
     .ClockFrequency ( 50_000_000 )
