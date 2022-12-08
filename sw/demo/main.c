@@ -2,6 +2,7 @@
 #include "timer.h"
 #include "gpio.h"
 #include "pwm.h"
+#include <stdbool.h>
 
 int main(void) {
   timer_init();
@@ -14,11 +15,8 @@ int main(void) {
   set_outputs(GPIO0, 0x0);
 
   uint16_t counter = UINT16_MAX;
-  uint16_t pulse_width = 2;
-
-  for(int i = 0; i < NUM_PWM_MODULES; i++) {
-    set_pwm(PWM_FROM_ADDR_AND_INDEX(PWM_BASE, i), counter, pulse_width);
-  }
+  uint16_t brightness = 0;
+  bool ascending = true;
 
   while(1) {
     uint64_t cur_time = get_elapsed_time();
@@ -28,12 +26,30 @@ int main(void) {
       puts("Hello World! ");
       puthex(last_elapsed_time);
       putchar('\n');
-      set_output_bit(GPIO0, cur_output_bit_index, cur_output_bit);
 
+      // Cycling through green LEDs
+      set_output_bit(GPIO0, cur_output_bit_index, cur_output_bit);
       cur_output_bit_index++;
       if (cur_output_bit_index >= 4) {
         cur_output_bit_index = 0;
         cur_output_bit = !cur_output_bit;
+      }
+
+      // Going from bright to dim on PWM
+      for(int i = 0; i < NUM_PWM_MODULES; i++) {
+        set_pwm(PWM_FROM_ADDR_AND_INDEX(PWM_BASE, i), counter,
+            brightness ? 1 << (brightness - 1) : 0);
+      }
+      if (ascending) {
+        brightness++;
+        if (brightness >= 5) {
+          ascending = false;
+        }
+      } else {
+        brightness--;
+        if (brightness == 0) {
+          ascending = true;
+        }
       }
     }
 
