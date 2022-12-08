@@ -292,17 +292,36 @@ module ibex_demo_system #(
     .gp_o
   );
 
+  // Section for generating the PWM modules and connecting them to the bus.
   for (genvar i = 0; i < PwmWidth; i++) begin : gen_pwm
+    logic [PwmCtrSize-1:0] counter_d;
+    logic [PwmCtrSize-1:0] counter_q;
+    logic [PwmCtrSize-1:0] pulse_width_d;
+    logic [PwmCtrSize-1:0] pulse_width_q;
+    assign counter_d = 8'b11111111;
+    assign pulse_width_d = {4'b0000, sw_i};
+    always @(posedge clk_sys_i or negedge rst_sys_ni) begin
+      if (!rst_sys_ni) begin
+        counter_q     <= '0;
+        pulse_width_q <= '0;
+      end else begin
+        counter_q <= counter_d;
+        pulse_width_q <= pulse_width_d;
+      end
+    end
     pwm #(
-      .CtrSize(8)
+      .CtrSize( PwmCtrSize )
     ) u_pwm (
-      .clk_sys_i(clk_sys_i),
-      .rst_sys_ni(rst_sys_ni),
-      .pulse_width_i({4'b0000, sw_i}),
-      .max_counter_i(8'b11111111),
-      .modulated_o(pwm_o[i])
+      .clk_sys_i    (clk_sys_i),
+      .rst_sys_ni   (rst_sys_ni),
+      .pulse_width_i(pulse_width_q),
+      .max_counter_i(counter_q),
+      .modulated_o  (pwm_o[i])
     );
   end : gen_pwm
+  // Reading from PWM currently not possible.
+  assign device_rvalid[Pwm] = 1'b0;
+  assign device_rdata[Pwm]  = 32'b0;
 
   uart #(
     .ClockFrequency ( 50_000_000 )
