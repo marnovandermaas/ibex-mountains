@@ -5,8 +5,8 @@
 module pwm #(
   parameter int CtrSize = 8
 ) (
-  input  logic               clk_sys_i,
-  input  logic               rst_sys_ni,
+  input  logic               clk_i,
+  input  logic               rst_ni,
 
   // If you want an always on signal, you will need to make pulse_width_i > max_counter_i.
   input  logic [CtrSize-1:0] pulse_width_i,
@@ -16,8 +16,8 @@ module pwm #(
 );
   logic [CtrSize-1:0] counter;
 
-  always_ff @(posedge clk_sys_i) begin
-    if (!rst_sys_ni || max_counter_i == 0) begin
+  always_ff @(posedge clk_i or negedge rst_ni) begin
+    if (!rst_ni || max_counter_i == 0) begin
       counter <= 'b0;
       modulated_o <= 'b0;
     end else begin

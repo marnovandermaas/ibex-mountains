@@ -291,51 +291,23 @@ module ibex_demo_system #(
     .gp_o
   );
 
-  // Section for generating the PWM modules and connecting them to the bus.
-  for (genvar i = 0; i < PwmWidth; i++) begin : gen_pwm
-    logic [PwmCtrSize-1:0] counter_d;
-    logic [PwmCtrSize-1:0] counter_q;
-    logic [PwmCtrSize-1:0] pulse_width_d;
-    logic [PwmCtrSize-1:0] pulse_width_q;
-    logic pwm_en;
+  pwm_wrapper #(
+    .PwmWidth   ( PwmWidth ),
+    .PwmCtrSize ( PwmCtrSize )
+  ) u_pwm (
+    .clk_i          (clk_sys_i),
+    .rst_ni         (rst_sys_ni),
 
-    // Byte enables are currently unsupported for PWM.
-    assign counter_d     = device_wdata[Pwm][PwmCtrSize-1+16:16]; // LSB is 16.
-    assign pulse_width_d = device_wdata[Pwm][PwmCtrSize-1+ 0: 0]; // LSB is  0.
+    .device_req_i   (device_req[Pwm]),
+    .device_addr_i  (device_addr[Pwm]),
+    .device_we_i    (device_we[Pwm]),
+    .device_be_i    (device_be[Pwm]),
+    .device_wdata_i (device_wdata[Pwm]),
+    .device_rvalid_o(device_rvalid[Pwm]),
+    .device_rdata_o (device_rdata[Pwm]),
 
-    assign pwm_en = device_req[Pwm] & device_we[Pwm] & (device_addr[Pwm][9:0] == (i * 4));
-
-    always @(posedge clk_sys_i or negedge rst_sys_ni) begin
-      if (!rst_sys_ni) begin
-        counter_q          <= '0;
-        pulse_width_q      <= '0;
-      end else begin
-        if (pwm_en) begin
-          counter_q          <= counter_d;
-          pulse_width_q      <= pulse_width_d;
-        end
-      end
-    end
-    pwm #(
-      .CtrSize( PwmCtrSize )
-    ) u_pwm (
-      .clk_sys_i    (clk_sys_i),
-      .rst_sys_ni   (rst_sys_ni),
-      .pulse_width_i(pulse_width_q),
-      .max_counter_i(counter_q),
-      .modulated_o  (pwm_o[i])
-    );
-  end : gen_pwm
-  // Reading from PWM currently not possible.
-  assign device_rdata[Pwm] = 32'b0;
-  always @(posedge clk_sys_i or negedge rst_sys_ni) begin
-    if (!rst_sys_ni) begin
-      device_rvalid[Pwm] <= 1'b0;
-    end else begin
-      // TODO only set rvalid if rdata was valid.
-      device_rvalid[Pwm] <= device_req[Pwm];
-    end
-  end
+    .pwm_o
+  );
 
   uart #(
     .ClockFrequency ( 50_000_000 )
