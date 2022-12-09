@@ -6,7 +6,7 @@
 
 int main(void) {
   timer_init();
-  timer_enable(50000000);
+  timer_enable(5000000);
 
   uint64_t last_elapsed_time = get_elapsed_time();
   uint32_t cur_output_bit = 1;
@@ -17,6 +17,8 @@ int main(void) {
   uint16_t counter = UINT16_MAX;
   uint16_t brightness = 0;
   bool ascending = true;
+
+  int color = 7;
 
   while(1) {
     uint64_t cur_time = get_elapsed_time();
@@ -37,7 +39,8 @@ int main(void) {
 
       // Going from bright to dim on PWM
       for(int i = 0; i < NUM_PWM_MODULES; i++) {
-        set_pwm(PWM_FROM_ADDR_AND_INDEX(PWM_BASE, i), counter,
+        set_pwm(PWM_FROM_ADDR_AND_INDEX(PWM_BASE, i),
+            ((1 << (i%3)) & color) ? counter : 0,
             brightness ? 1 << (brightness - 1) : 0);
       }
       if (ascending) {
@@ -49,6 +52,10 @@ int main(void) {
         brightness--;
         if (brightness == 0) {
           ascending = true;
+          color++;
+          if (color >= 8) {
+            color = 1;
+          }
         }
       }
     }
