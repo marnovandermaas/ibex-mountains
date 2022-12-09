@@ -17,7 +17,6 @@ module ibex_demo_system #(
 ) (
   input logic                 clk_sys_i,
   input logic                 rst_sys_ni,
-  input logic [3:0]           sw_i,
 
   output logic [GpoWidth-1:0] gp_o,
   output logic [PwmWidth-1:0] pwm_o,
