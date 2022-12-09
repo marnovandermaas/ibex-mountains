@@ -22,28 +22,28 @@ module ibex_demo_system #(
   output logic [PwmWidth-1:0] pwm_o,
   output logic                uart_tx_o
 );
-  localparam logic [31:0] MEM_SIZE     = 64 * 1024; // 64 kiB
+  localparam logic [31:0] MEM_SIZE     = 64 * 1024; // 64 KiB
   localparam logic [31:0] MEM_START    = 32'h00100000;
   localparam logic [31:0] MEM_MASK     = ~(MEM_SIZE-1);
 
-  localparam logic [31:0] GPIO_SIZE    =  4 * 1024; //  4 kiB
+  localparam logic [31:0] GPIO_SIZE    =  4 * 1024; //  4 KiB
   localparam logic [31:0] GPIO_START   = 32'h80000000;
   localparam logic [31:0] GPIO_MASK    = ~(GPIO_SIZE-1);
 
   localparam logic [31:0] DEBUG_START  = 32'h1a110000;
-  localparam logic [31:0] DEBUG_SIZE   = 64 * 1024; // 64 kiB
+  localparam logic [31:0] DEBUG_SIZE   = 64 * 1024; // 64 KiB
   localparam logic [31:0] DEBUG_MASK   = ~(DEBUG_SIZE-1);
 
-  localparam logic [31:0] UART_SIZE    =  4 * 1024; //  4 kiB
+  localparam logic [31:0] UART_SIZE    =  4 * 1024; //  4 KiB
   localparam logic [31:0] UART_START   = 32'h80001000;
   localparam logic [31:0] UART_MASK    = ~(UART_SIZE-1);
 
-  localparam logic [31:0] TIMER_SIZE   =  4 * 1024; //  4 kiB
+  localparam logic [31:0] TIMER_SIZE   =  4 * 1024; //  4 KiB
   localparam logic [31:0] TIMER_START  = 32'h80002000;
   localparam logic [31:0] TIMER_MASK   = ~(TIMER_SIZE-1);
 
   // Pulse width modulator parameters
-  localparam logic [31:0] PWM_SIZE     =  4 * 1024; //  4 kiB
+  localparam logic [31:0] PWM_SIZE     =  4 * 1024; //  4 KiB
   localparam logic [31:0] PWM_START    = 32'h80003000;
   localparam logic [31:0] PWM_MASK     = ~(PWM_SIZE-1);
   localparam int PwmCtrSize = 8;
