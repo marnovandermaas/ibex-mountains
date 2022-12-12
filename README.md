@@ -15,12 +15,16 @@ probe is required.
 ## Software Requirements
 
 * Xilinx Vivado - https://www.xilinx.com/support/download.html
-* rv32imc GCC toolchain - lowRISC provide one: 
+* rv32imc GCC toolchain - lowRISC provide one:
   https://github.com/lowRISC/lowrisc-toolchains/releases
 * cmake
+* git
+* openocd
 * python3 - Additional python dependencies in python-requirements.txt installed
   with pip
 * openocd (version 0.11.0 or above)
+* wget
+* xz-utils
 
 To install python dependencies use pip, you may wish to do this inside a virtual
 environment to avoid disturbing you current python setup (note it uses a lowRISC
