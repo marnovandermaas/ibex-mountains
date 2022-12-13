@@ -292,8 +292,9 @@ module ibex_demo_system #(
   );
 
   pwm_wrapper #(
-    .PwmWidth   ( PwmWidth ),
-    .PwmCtrSize ( PwmCtrSize )
+    .PwmWidth   ( PwmWidth   ),
+    .PwmCtrSize ( PwmCtrSize ),
+    .BusWidth   ( 32         )
   ) u_pwm (
     .clk_i          (clk_sys_i),
     .rst_ni         (rst_sys_ni),
