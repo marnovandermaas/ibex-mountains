@@ -10,7 +10,6 @@
 typedef uint32_t* pwm_t;
 
 #define PWM_FROM_ADDR_AND_INDEX(addr, index)(&(((pwm_t) addr)[2*index]))
-#define NUM_PWM_MODULES 12
 
 void set_pwm(pwm_t pwm, uint32_t counter, uint32_t pulse_width);
 
