@@ -17,8 +17,8 @@ int main(void) {
   set_outputs(GPIO0, 0x0);
 
   // PWM variables
-  uint16_t counter = UINT16_MAX;
-  uint16_t brightness = 0;
+  uint32_t counter = UINT8_MAX;
+  uint32_t brightness = 0;
   bool ascending = true;
   // The three least significant bits correspond to RGB, where B is the leas significant.
   uint8_t color = 7;

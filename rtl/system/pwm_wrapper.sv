@@ -25,26 +25,30 @@ module pwm_wrapper #(
 );
   // Generate PwmWidth number of PWMs.
   for (genvar i = 0; i < PwmWidth; i++) begin : gen_pwm
-    logic [PwmCtrSize-1:0] counter_d;
+    logic [PwmCtrSize-1:0] data_d;
     logic [PwmCtrSize-1:0] counter_q;
-    logic [PwmCtrSize-1:0] pulse_width_d;
     logic [PwmCtrSize-1:0] pulse_width_q;
     logic pwm_en;
+    logic counter_en;
+    logic pulse_width_en;
 
     // Byte enables are currently unsupported for PWM.
-    assign counter_d     = device_wdata_i[PwmCtrSize-1+16:16]; // LSB is 16.
-    assign pulse_width_d = device_wdata_i[PwmCtrSize-1+ 0: 0]; // LSB is  0.
-
-    assign pwm_en = device_req_i & device_we_i & (device_addr_i[9:0] == (i * 4));
+    assign data_d         = device_wdata_i[PwmCtrSize-1:0]; // Only take PwmCtrSize LSBs.
+    // Each PWM has a 64-bit block. The most significant 32 bits are the counter and the least
+    // significant 32 bits are the pulse width.
+    assign counter_en     = device_req_i & device_we_i & (device_addr_i[9:0] == ((i * 2*BusWidth/8) + BusWidth/8));
+    assign pulse_width_en = device_req_i & device_we_i & (device_addr_i[9:0] == (i * 2*BusWidth/8));
 
     always @(posedge clk_i or negedge rst_ni) begin
       if (!rst_ni) begin
-        counter_q          <= '0;
-        pulse_width_q      <= '0;
+        counter_q       <= '0;
+        pulse_width_q   <= '0;
       end else begin
-        if (pwm_en) begin
-          counter_q          <= counter_d;
-          pulse_width_q      <= pulse_width_d;
+        if (counter_en) begin
+          counter_q     <= data_d;
+        end
+        if (pulse_width_en) begin
+          pulse_width_q <= data_d;
         end
       end
     end

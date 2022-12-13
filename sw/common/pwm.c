@@ -5,8 +5,7 @@
 #include "pwm.h"
 #include "dev_access.h"
 
-void set_pwm(pwm_t pwm, uint16_t counter, uint16_t pulse_width) {
-  uint32_t output = (((uint32_t) counter) << 16) | pulse_width;
-  pwm_t tmp_pwm = pwm;
-  DEV_WRITE(pwm, output);
+void set_pwm(pwm_t pwm, uint32_t counter, uint32_t pulse_width) {
+  DEV_WRITE(&pwm[1], counter);
+  DEV_WRITE(&pwm[0], pulse_width);
 }
