@@ -17,8 +17,11 @@ module pwm #(
   logic [CtrSize-1:0] counter;
 
   always_ff @(posedge clk_i or negedge rst_ni) begin
-    if (!rst_ni || max_counter_i == 0) begin
-      counter <= 'b0;
+    if (!rst_ni) begin
+      counter     <= 'b0;
+      modulated_o <= 'b0;
+    end else if (max_counter_i == 0) begin
+      counter     <= 'b0;
       modulated_o <= 'b0;
     end else begin
       if (counter < max_counter_i) begin
