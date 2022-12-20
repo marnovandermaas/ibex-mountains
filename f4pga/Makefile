@@ -4,12 +4,27 @@ TARGET := arty_35
 BUILDDIR := .
 BOARD_BUILDDIR := ${BUILDDIR}/${TARGET}
 
-
-SOURCES := /home/mvdmaas/repos/demo-system-ibex/rtl/fpga/top_artya7.sv
-SOURCES += /home/mvdmaas/repos/demo-system-ibex/rtl/system/*.sv
-SOURCES += /home/mvdmaas/repos/demo-system-ibex/vendor/lowrisc_ibex/vendor/lowrisc_ip/ip/prim/rtl/*.sv
-SOURCES += /home/mvdmaas/repos/demo-system-ibex/vendor/lowrisc_ibex/rtl/*.sv
-SOURCES += /home/mvdmaas/repos/demo-system-ibex/vendor/pulp_riscv_dbg/src/*.sv
+ROOTDIR := /home/mvdmaas/repos/demo-system-ibex
+SOURCES := ${ROOTDIR}/rtl/fpga/top_artya7.sv
+SOURCES += ${ROOTDIR}/rtl/system/*.sv
+SOURCES += ${ROOTDIR}/vendor/lowrisc_ibex/rtl/*.sv
+SOURCES += ${ROOTDIR}/vendor/lowrisc_ibex/shared/rtl/*.sv
+SOURCES += ${ROOTDIR}/vendor/lowrisc_ibex/shared/rtl/fpga/xilinx/*.sv
+SOURCES += ${ROOTDIR}/vendor/lowrisc_ibex/dv/uvm/core_ibex/common/prim/*.sv
+#SOURCES += ${ROOTDIR}/vendor/lowrisc_ibex/vendor/lowrisc_ip/ip/prim/rtl/*.sv
+#SOURCES += ${ROOTDIR}/vendor/lowrisc_ibex/vendor/lowrisc_ip/ip/prim/rtl/prim_ram_1p_pkg.sv
+#SOURCES += ${ROOTDIR}/vendor/lowrisc_ibex/vendor/lowrisc_ip/ip/prim/rtl/prim_secded_pkg.sv
+SOURCES += ${ROOTDIR}/vendor/lowrisc_ibex/vendor/lowrisc_ip/ip/prim/rtl/prim_*_pkg.sv
+SOURCES += ${ROOTDIR}/vendor/lowrisc_ibex/vendor/lowrisc_ip/ip/prim/rtl/prim_fifo_sync.sv
+SOURCES += ${ROOTDIR}/vendor/lowrisc_ibex/vendor/lowrisc_ip/ip/prim/rtl/prim_fifo_sync_cnt.sv
+SOURCES += ${ROOTDIR}/vendor/lowrisc_ibex/vendor/lowrisc_ip/ip/prim/rtl/prim_fifo_async.sv
+SOURCES += ${ROOTDIR}/vendor/lowrisc_ibex/vendor/lowrisc_ip/ip/prim_generic/rtl/prim_generic_buf.sv
+SOURCES += ${ROOTDIR}/vendor/lowrisc_ibex/vendor/lowrisc_ip/ip/prim_generic/rtl/prim_generic_clock_gating.sv
+SOURCES += ${ROOTDIR}/vendor/lowrisc_ibex/vendor/lowrisc_ip/ip/prim_generic/rtl/prim_generic_ram_1p.sv
+SOURCES += ${ROOTDIR}/vendor/lowrisc_ibex/vendor/lowrisc_ip/ip/prim_xilinx/rtl/*.sv
+#SOURCES += ${ROOTDIR}/vendor/lowrisc_ibex/vendor/lowrisc_ip/dv/sv/dv_utils/*.svh
+SOURCES += ${ROOTDIR}/vendor/pulp_riscv_dbg/src/*.sv
+SOURCES += ${ROOTDIR}/vendor/pulp_riscv_dbg/debug_rom/*.sv
 
 # Set board properties based on TARGET variable
 ifeq ($(TARGET),arty_35)
@@ -71,7 +86,7 @@ ${BOARD_BUILDDIR}:
 	mkdir -p ${BOARD_BUILDDIR}
 
 ${BOARD_BUILDDIR}/${TOP}.eblif: ${SOURCES} ${XDC} ${SDC} ${PCF} | ${BOARD_BUILDDIR}
-	cd ${BOARD_BUILDDIR} && symbiflow_synth -t ${TOP} ${SURELOG_OPT} -v ${SOURCES} -d ${BITSTREAM_DEVICE} -p ${PARTNAME} ${XDC_CMD} -s "-Ivendor/lowrisc_ibex/vendor/lowrisc_ip/ip/prim/rtl -Ivendor/lowrisc_ibex/vendor/lowrisc_ip/dv/sv/dv_utils -sv"
+	cd ${BOARD_BUILDDIR} && symbiflow_synth -t ${TOP} ${SURELOG_OPT} -v ${SOURCES} -d ${BITSTREAM_DEVICE} -p ${PARTNAME} ${XDC_CMD} -s "-sv -noassert -DSYNTHESIS -I/home/mvdmaas/repos/demo-system-ibex/vendor/lowrisc_ibex/vendor/lowrisc_ip/ip/prim/rtl -I/home/mvdmaas/repos/demo-system-ibex/vendor/lowrisc_ibex/vendor/lowrisc_ip/ip/prim_generic/rtl -I/home/mvdmaas/repos/demo-system-ibex/vendor/lowrisc_ibex/vendor/lowrisc_ip/dv/sv/dv_utils"
 
 ${BOARD_BUILDDIR}/${TOP}.net: ${BOARD_BUILDDIR}/${TOP}.eblif
 	cd ${BOARD_BUILDDIR} && symbiflow_pack -e ${TOP}.eblif -d ${DEVICE} ${SDC_CMD} 2>&1 > /dev/null
