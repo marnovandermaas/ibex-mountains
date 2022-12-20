@@ -250,28 +250,36 @@ module ibex_demo_system #(
      .core_sleep_o          ()
   );
 
-  ram_2p #(
+  ram_1p #(
       .Depth       ( MEM_SIZE / 4 ),
       .MemInitFile ( SRAMInitFile )
-  ) u_ram (
-    .clk_i       (clk_sys_i),
-    .rst_ni      (rst_sys_ni),
+  ) u_ram_a (
+    .clk_i    (clk_sys_i),
+    .rst_ni   (rst_sys_ni),
 
-    .a_req_i     (device_req[Ram]),
-    .a_we_i      (device_we[Ram]),
-    .a_be_i      (device_be[Ram]),
-    .a_addr_i    (device_addr[Ram]),
-    .a_wdata_i   (device_wdata[Ram]),
-    .a_rvalid_o  (device_rvalid[Ram]),
-    .a_rdata_o   (device_rdata[Ram]),
+    .req_i    (device_req[Ram]),
+    .we_i     (device_we[Ram]),
+    .be_i     (device_be[Ram]),
+    .addr_i   (device_addr[Ram]),
+    .wdata_i  (device_wdata[Ram]),
+    .rvalid_o (device_rvalid[Ram]),
+    .rdata_o  (device_rdata[Ram])
+  );
 
-    .b_req_i     (mem_instr_req),
-    .b_we_i      (1'b0),
-    .b_be_i      (4'b0),
-    .b_addr_i    (core_instr_addr),
-    .b_wdata_i   (32'b0),
-    .b_rvalid_o  (),
-    .b_rdata_o   (mem_instr_rdata)
+  ram_1p #(
+      .Depth       ( MEM_SIZE / 4 ),
+      .MemInitFile ( SRAMInitFile )
+  ) u_ram_b (
+    .clk_i    (clk_sys_i),
+    .rst_ni   (rst_sys_ni),
+
+    .req_i    (mem_instr_req),
+    .we_i     (1'b0),
+    .be_i     (4'b0),
+    .addr_i   (core_instr_addr),
+    .wdata_i  (32'b0),
+    .rvalid_o (),
+    .rdata_o  (mem_instr_rdata)
   );
 
   gpio #(
