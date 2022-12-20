@@ -5,9 +5,9 @@ BUILDDIR := .
 BOARD_BUILDDIR := ${BUILDDIR}/${TARGET}
 
 
-SOURCES := /home/mvdmaas/repos/demo-system-ibex/vendor/lowrisc_ibex/vendor/lowrisc_ip/ip/prim/rtl/prim_assert.sv
-SOURCES += /home/mvdmaas/repos/demo-system-ibex/rtl/fpga/top_artya7.sv
+SOURCES := /home/mvdmaas/repos/demo-system-ibex/rtl/fpga/top_artya7.sv
 SOURCES += /home/mvdmaas/repos/demo-system-ibex/rtl/system/*.sv
+SOURCES += /home/mvdmaas/repos/demo-system-ibex/vendor/lowrisc_ibex/vendor/lowrisc_ip/ip/prim/rtl/*.sv
 SOURCES += /home/mvdmaas/repos/demo-system-ibex/vendor/lowrisc_ibex/rtl/*.sv
 SOURCES += /home/mvdmaas/repos/demo-system-ibex/vendor/pulp_riscv_dbg/src/*.sv
 
@@ -71,7 +71,7 @@ ${BOARD_BUILDDIR}:
 	mkdir -p ${BOARD_BUILDDIR}
 
 ${BOARD_BUILDDIR}/${TOP}.eblif: ${SOURCES} ${XDC} ${SDC} ${PCF} | ${BOARD_BUILDDIR}
-	cd ${BOARD_BUILDDIR} && symbiflow_synth -t ${TOP} ${SURELOG_OPT} -v ${SOURCES} -d ${BITSTREAM_DEVICE} -p ${PARTNAME} ${XDC_CMD}
+	cd ${BOARD_BUILDDIR} && symbiflow_synth -t ${TOP} ${SURELOG_OPT} -v ${SOURCES} -d ${BITSTREAM_DEVICE} -p ${PARTNAME} ${XDC_CMD} -s "-Ivendor/lowrisc_ibex/vendor/lowrisc_ip/ip/prim/rtl -Ivendor/lowrisc_ibex/vendor/lowrisc_ip/dv/sv/dv_utils -sv"
 
 ${BOARD_BUILDDIR}/${TOP}.net: ${BOARD_BUILDDIR}/${TOP}.eblif
 	cd ${BOARD_BUILDDIR} && symbiflow_pack -e ${TOP}.eblif -d ${DEVICE} ${SDC_CMD} 2>&1 > /dev/null
