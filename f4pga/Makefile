@@ -1,7 +1,7 @@
 TOP := top_artya7
 TARGET := arty_35
 
-BUILDDIR := .
+BUILDDIR := build
 BOARD_BUILDDIR := ${BUILDDIR}/${TARGET}
 
 ROOTDIR := /home/mvdmaas/repos/demo-system-ibex
@@ -18,6 +18,7 @@ SOURCES += ${ROOTDIR}/vendor/lowrisc_ibex/vendor/lowrisc_ip/ip/prim/rtl/prim_*_p
 SOURCES += ${ROOTDIR}/vendor/lowrisc_ibex/vendor/lowrisc_ip/ip/prim/rtl/prim_fifo_sync.sv
 SOURCES += ${ROOTDIR}/vendor/lowrisc_ibex/vendor/lowrisc_ip/ip/prim/rtl/prim_fifo_sync_cnt.sv
 SOURCES += ${ROOTDIR}/vendor/lowrisc_ibex/vendor/lowrisc_ip/ip/prim/rtl/prim_fifo_async.sv
+SOURCES += ${ROOTDIR}/vendor/lowrisc_ibex/vendor/lowrisc_ip/ip/prim/rtl/prim_flop_2sync.sv
 SOURCES += ${ROOTDIR}/vendor/lowrisc_ibex/vendor/lowrisc_ip/ip/prim_generic/rtl/prim_generic_buf.sv
 SOURCES += ${ROOTDIR}/vendor/lowrisc_ibex/vendor/lowrisc_ip/ip/prim_generic/rtl/prim_generic_clock_gating.sv
 SOURCES += ${ROOTDIR}/vendor/lowrisc_ibex/vendor/lowrisc_ip/ip/prim_generic/rtl/prim_generic_ram_1p.sv
@@ -25,6 +26,8 @@ SOURCES += ${ROOTDIR}/vendor/lowrisc_ibex/vendor/lowrisc_ip/ip/prim_xilinx/rtl/*
 #SOURCES += ${ROOTDIR}/vendor/lowrisc_ibex/vendor/lowrisc_ip/dv/sv/dv_utils/*.svh
 SOURCES += ${ROOTDIR}/vendor/pulp_riscv_dbg/src/*.sv
 SOURCES += ${ROOTDIR}/vendor/pulp_riscv_dbg/debug_rom/*.sv
+SOURCES += /nas/lowrisc/tools/xilinx/Vivado/2021.1/data/verilog/src/xeclib/BSCANE2.v
+#SOURCES += /home/mvdmaas/repos/yosys-systemverilog/image/share/yosys/xilinx/cells_sim.v
 
 # Set board properties based on TARGET variable
 ifeq ($(TARGET),arty_35)
