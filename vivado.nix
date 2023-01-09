@@ -1,9 +1,11 @@
-{ stdenv, lib, breakpointHook, requireFile
+{ stdenv, lib, breakpointHook
 , fetchurl, patchelf, makeWrapper
+, vivado-src
 , coreutils
 , procps
 , zlib
 , ncurses5
+, libxcrypt
 , libuuid
 , libSM
 , libICE
@@ -22,23 +24,10 @@ stdenv.mkDerivation rec {
   pname = "vivado";
   version = "2022.2";
 
-  # requireFile prevents rehashing each time, which saves time during rebuilds.
-  src = requireFile rec {
-    name = "xilinx_bundle";
-  #   message = ''
-  #     This nix expression requires that ${name} is already part of the store.
-  #     Login to Xilinx, download from
-  #     https://www.xilinx.com/support/download.html,
-  #     rename the file to ${name}, and add it to the nix store with
-  #     "nix-prefetch-url file:///path/to/${name}".
-  #   '';
-    message = ''
-      New message.
-    '';
-    sha256 = "070hf2l0h31gi0vy4hfm655ina59hi05q2nxrhhgsi044v6hbifc";
-  };
+  # src = vivado-src;
 
   nativeBuildInputs = [
+    vivado-src
     makeWrapper
     breakpointHook
   ];
@@ -46,35 +35,27 @@ stdenv.mkDerivation rec {
   buildInputs = [
     procps
     ncurses5
+    libxcrypt
   ];
 
-  unpackPhase = ''
-    local PREFIX=.
-    mkdir -p $PREFIX
-    ${src} --keep --noexec --target .
-    cat xsetup
-    exit 0
-  '';
-
-  postPatch = ''
-    echo $(pwd)
-    patchShebangs .
-
-    patchelf --set-interpreter "$(cat $NIX_CC/nix-support/dynamic-linker)" \
-             tps/lnx64/jre*/bin/java
-
-    sed -i -- 's|/bin/rm|rm|g' xsetup
-  '';
-
+  dontUnpack = true;
   dontBuild = true;
+  dontStrip = true;
+
+  libPath = lib.makeLibraryPath [
+    stdenv.cc.cc
+    ncurses5 zlib libxcrypt
+    libuuid libSM libICE libX11 libXrender libxcb libXext libXtst libXi
+    glib gtk2 freetype
+  ];
 
   installPhase = ''
-
     cat <<EOF > install_config.txt
-    Edition=Vitis Unified Software Platform
+    Edition=Vivado ML Standard
+    Product=Vivado
     Destination=$out/opt
     Modules=Spartan-7:1,Virtex-7:1,Artix-7:1
-    InstallOptions=Acquire or Manage a License Key:0,Enable WebTalk for SDK to send usage statistics to Xilinx:0
+    InstallOptions=
     CreateProgramGroupShortcuts=0
     ProgramGroupFolder=Xilinx Design Tools
     CreateShortcutsForAllUsers=0
@@ -90,68 +71,99 @@ stdenv.mkDerivation rec {
     # This is required because it tries to run the unpatched scripts to check if the installation
     # has succeeded. However, these scripts will fail because they have not been patched yet,
     # and the installer will proceed to delete the installation if not killed.
-    # set -x
-    (./xsetup --agree XilinxEULA,3rdPartyEULA --batch Install --config install_config.txt || true) | while read line
+    (${vivado-src}/xsetup \
+      --agree XilinxEULA,3rdPartyEULA \
+      --batch Install \
+      --config install_config.txt || true) | while read line
     do
-        [[ "''${line}" == *"Execution of Pre/Post Installation Tasks Failed"* ]] && echo "killing installer!" && ((pkill -9 -f "tps/lnx64/jre/bin/java") || true)
+        [[ "''${line}" == *"Execution of Pre/Post Installation Tasks Failed"* ]] \
+          && echo "killing installer!" \
+          && ((pkill -9 -f "tps/lnx64/jre/bin/java") || true)
+
         echo ''${line}
     done
   '';
 
-  libPath = lib.makeLibraryPath [
-    stdenv.cc.cc
-    ncurses5
-    zlib
-    libuuid
-    libSM
-    libICE
-    libX11
-    libXrender
-    libxcb
-    libXext
-    libXtst
-    libXi
-    glib
-    freetype
-    gtk2
-  ];
 
   preFixup = ''
-    # Patch installed files
-    patchShebangs $out/opt/Vivado/$version/bin
-    patchShebangs $out/opt/SDK/$version/bin
+    set -x
 
-    # Hack around lack of libtinfo in NixOS
-    ln -s $ncurses/lib/libncursesw.so.6 $out/opt/Vivado/$version/lib/lnx64.o/libtinfo.so.5
-    ln -s $ncurses/lib/libncursesw.so.6 $out/opt/SDK/$version/lib/lnx64.o/libtinfo.so.5
+    echo "Patch installed scripts"
+    patchShebangs $out/opt/Vivado/${version}/bin || true
 
-    # Patch ELFs
-    for f in $out/opt/Vivado/$version/bin/unwrapped/lnx64.o/*
+    echo "Hack around lack of libtinfo in NixOS"
+    ln -s ${ncurses5}/lib/libncursesw.so.6 $out/opt/Vivado/${version}/lib/lnx64.o/libtinfo.so.5 || true
+
+    echo "Patch ELFs"
+    for f in $out/opt/Vivado/${version}/bin/unwrapped/lnx64.o/* \
+             $out/opt/Vitis_HLS/${version}/bin/unwrapped/lnx64.o/*
     do
-        patchelf --set-interpreter "$(cat $NIX_CC/nix-support/dynamic-linker)" $f || true
+      patchelf --set-interpreter "$(cat ${stdenv.cc}/nix-support/dynamic-linker)" $f || true
     done
-    for f in $out/opt/SDK/$version/bin/unwrapped/lnx64.o/*
+
+    echo "Wrapping binaries"
+    for f in $out/opt/Vivado/${version}/bin/vivado \
+             $out/opt/Vitis_HLS/${version}/bin/vitis_hls
     do
-        patchelf --set-interpreter "$(cat $NIX_CC/nix-support/dynamic-linker)" $f || true
+      wrapProgram $f --prefix LD_LIBRARY_PATH : "${libPath}" || true
     done
-    patchelf --set-interpreter "$(cat $NIX_CC/nix-support/dynamic-linker)" $out/opt/SDK/$version/eclipse/lnx64.o/eclipse
-    patchelf --set-interpreter "$(cat $NIX_CC/nix-support/dynamic-linker)" $out/opt/SDK/$version/tps/lnx64/jre/bin/java
 
-    wrapProgram $out/opt/Vivado/$version/bin/vivado --prefix LD_LIBRARY_PATH : "$libPath"
-    wrapProgram $out/opt/SDK/$version/bin/xsdk --prefix LD_LIBRARY_PATH : "$libPath"
-    wrapProgram $out/opt/SDK/$version/eclipse/lnx64.o/eclipse --prefix LD_LIBRARY_PATH : "$libPath"
-    wrapProgram $out/opt/SDK/$version/tps/lnx64/jre/bin/java --prefix LD_LIBRARY_PATH : "$libPath"
-
-    # wrapProgram on its own will not work because of the way the Vivado script runs ./launch
-    # Therefore, we need Even More Patches...
+    # 'wrapProgram' on its own does not work
+    # - This is because of the way the Vivado script runs ./loader
+    # - Therefore, we need ---Even More Patches...---
+    echo "Even More Patches..."
     sed -i -- 's|`basename "\$0"`|vivado|g' $out/opt/Vivado/$version/bin/.vivado-wrapped
-    sed -i -- 's|`basename "\$0"`|xsdk|g' $out/opt/SDK/$version/bin/.xsdk-wrapped
+    # sed -i -- \
+    #   's#$(basename "\$0")#vivado#g' \
+    #   $out/opt/Vivado/${version}/bin/.vivado-wrapped || true
 
-    # Add vivado and xsdk to bin folder
+    echo "Adding to bin"
     mkdir $out/bin
-    ln -s $out/opt/Vivado/$version/bin/vivado $out/bin/vivado
-    ln -s $out/opt/SDK/$version/bin/xsdk $out/bin/xsdk
+    ln -s $out/opt/Vivado/${version}/bin/vivado $out/bin/vivado || true
+
+    set +x
   '';
+
+  # preFixup = ''
+  #   set -x
+  #
+  #   echo "Patch installed scripts"
+  #   patchShebangs $out/opt/{Vivado,SDK}/${version}/bin || true
+  #
+  #   echo "Hack around lack of libtinfo in NixOS"
+  #   ln -s ${ncurses5}/lib/libncursesw.so.6 $out/opt/Vivado/${version}/lib/lnx64.o/libtinfo.so.5 || true
+  #   ln -s ${ncurses5}/lib/libncursesw.so.6 $out/opt/SDK/${version}/lib/lnx64.o/libtinfo.so.5 || true
+  #
+  #   echo "Patch ELFs"
+  #   for f in $out/opt/Vivado/${version}/bin/unwrapped/lnx64.o/* \
+  #            $out/opt/SDK/${version}/bin/unwrapped/lnx64.o/* \
+  #            $out/opt/SDK/${version}/eclipse/lnx64.o/eclipse \
+  #            $out/opt/SDK/${version}/tps/lnx64/jre/bin/java
+  #   do
+  #     patchelf --set-interpreter "$(cat ${stdenv.cc}/nix-support/dynamic-linker)" $f || true
+  #   done
+  #
+  #   echo "Wrap binaries"
+  #   for f in $out/opt/Vivado/${version}/bin/vivado \
+  #            $out/opt/SDK/${version}/bin/xsdk \
+  #            $out/opt/SDK/${version}/eclipse/lnx64.o/eclipse \
+  #            $out/opt/SDK/${version}/tps/lnx64/jre/bin/java
+  #   do
+  #     wrapProgram $f --prefix LD_LIBRARY_PATH : "${libPath}" || true
+  #   done
+  #
+  #   # wrapProgram on its own will not work because of the way the Vivado script runs ./launch
+  #   # Therefore, we need ---Even More Patches...---
+  #   echo "Even More Patches..."
+  #   sed -i -- 's|$(basename "\$0")|vivado|g' $out/opt/Vivado/${version}/bin/.vivado-wrapped || true
+  #   sed -i -- 's|$(basename "\$0")|xsdk|g'   $out/opt/SDK/${version}/bin/.xsdk-wrapped || true
+  #
+  #   # Add vivado and xsdk to bin folder
+  #   echo "Adding to bin"
+  #   mkdir $out/bin
+  #   ln -s $out/opt/Vivado/${version}/bin/vivado $out/bin/vivado || true
+  #   ln -s $out/opt/SDK/${version}/bin/xsdk      $out/bin/xsdk || true
+  # '';
 
   meta = with lib; {
     description = "Xilinx Vivado";
@@ -160,3 +172,4 @@ stdenv.mkDerivation rec {
     maintainers = with maintainers; [ matthuszagh ];
   };
 }
+

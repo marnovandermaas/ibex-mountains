@@ -20,18 +20,52 @@
 
   outputs = all@{ self, nixpkgs, flake-utils, ... }:
 
-    # Utilized by `nix build .`
-    # Utilized by `nix build`
-    # defaultPackage.x86_64-linux = c-hello.defaultPackage.x86_64-linux;
-    # packages.x86_64-linux.hello = c-hello.packages.x86_64-linux.hello;
-
     (flake-utils.lib.eachDefaultSystem (system:
       let
         pkgs = import nixpkgs {
           inherit system;
           config = { allowUnfree = true; };
         };
-        vivado = pkgs.callPackage (import ./vivado.nix) { };
+
+        # Using requireFile prevents rehashing each time,
+        # This saves much seconds during rebuilds.
+        src = pkgs.requireFile rec {
+          name = "vivado_bundled.tar.gz";
+          sha256 = "1yxx6crvawhzvary9js0m8bzm35vv6pzfqdkv095r84lb13fyp7b";
+          # Print the following message if the name / hash are not
+          # found in the store.
+          message = ''
+            requireFile :
+            file/dir not found in /nix/store
+            file = ${name}
+            hash = ${sha256}
+
+            This nix expression requires that ${name} is already part of the store.
+            - Login to xilinx.com
+            - Download from https://www.xilinx.com/support/download.html,
+            - Rename the file to ${name}
+            - Add it to the nix store with
+              $ nix-prefetch-url --type sha256 --print-path file:</path/to/${name}>
+          '';
+        };
+        vivado = pkgs.callPackage (import ./vivado.nix) {
+          vivado-src = pkgs.stdenv.mkDerivation rec {
+            pname = "vivado_src";
+            version = "2022.2";
+            inherit src;
+            postPatch = ''
+              patchShebangs .
+              patchelf \
+                --set-interpreter $(cat ${pkgs.stdenv.cc}/nix-support/dynamic-linker) \
+                tps/lnx64/jre*/bin/java
+            '';
+            dontBuild = true; dontFixup = true;
+            installPhase = ''
+              mkdir -p $out
+              cp -R * $out
+            '';
+          };
+        };
       in {
         packages.dockertest = pkgs.dockerTools.buildImage {
           name = "hello-docker";
@@ -44,6 +78,7 @@
             Cmd = [ "${pkgs.sl}/bin/sl" ];
           };
         };
+        packages.src1 = vivado;
         devShells.vivadotest = pkgs.mkShell {
           buildInputs = [
             vivado
