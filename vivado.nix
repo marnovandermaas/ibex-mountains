@@ -86,8 +86,6 @@ stdenv.mkDerivation rec {
 
 
   preFixup = ''
-    set -x
-
     echo "Patch installed scripts"
     patchShebangs $out/opt/Vivado/${version}/bin || true
 
@@ -113,57 +111,11 @@ stdenv.mkDerivation rec {
     # - Therefore, we need ---Even More Patches...---
     echo "Even More Patches..."
     sed -i -- 's|`basename "\$0"`|vivado|g' $out/opt/Vivado/$version/bin/.vivado-wrapped
-    # sed -i -- \
-    #   's#$(basename "\$0")#vivado#g' \
-    #   $out/opt/Vivado/${version}/bin/.vivado-wrapped || true
 
     echo "Adding to bin"
     mkdir $out/bin
     ln -s $out/opt/Vivado/${version}/bin/vivado $out/bin/vivado || true
-
-    set +x
   '';
-
-  # preFixup = ''
-  #   set -x
-  #
-  #   echo "Patch installed scripts"
-  #   patchShebangs $out/opt/{Vivado,SDK}/${version}/bin || true
-  #
-  #   echo "Hack around lack of libtinfo in NixOS"
-  #   ln -s ${ncurses5}/lib/libncursesw.so.6 $out/opt/Vivado/${version}/lib/lnx64.o/libtinfo.so.5 || true
-  #   ln -s ${ncurses5}/lib/libncursesw.so.6 $out/opt/SDK/${version}/lib/lnx64.o/libtinfo.so.5 || true
-  #
-  #   echo "Patch ELFs"
-  #   for f in $out/opt/Vivado/${version}/bin/unwrapped/lnx64.o/* \
-  #            $out/opt/SDK/${version}/bin/unwrapped/lnx64.o/* \
-  #            $out/opt/SDK/${version}/eclipse/lnx64.o/eclipse \
-  #            $out/opt/SDK/${version}/tps/lnx64/jre/bin/java
-  #   do
-  #     patchelf --set-interpreter "$(cat ${stdenv.cc}/nix-support/dynamic-linker)" $f || true
-  #   done
-  #
-  #   echo "Wrap binaries"
-  #   for f in $out/opt/Vivado/${version}/bin/vivado \
-  #            $out/opt/SDK/${version}/bin/xsdk \
-  #            $out/opt/SDK/${version}/eclipse/lnx64.o/eclipse \
-  #            $out/opt/SDK/${version}/tps/lnx64/jre/bin/java
-  #   do
-  #     wrapProgram $f --prefix LD_LIBRARY_PATH : "${libPath}" || true
-  #   done
-  #
-  #   # wrapProgram on its own will not work because of the way the Vivado script runs ./launch
-  #   # Therefore, we need ---Even More Patches...---
-  #   echo "Even More Patches..."
-  #   sed -i -- 's|$(basename "\$0")|vivado|g' $out/opt/Vivado/${version}/bin/.vivado-wrapped || true
-  #   sed -i -- 's|$(basename "\$0")|xsdk|g'   $out/opt/SDK/${version}/bin/.xsdk-wrapped || true
-  #
-  #   # Add vivado and xsdk to bin folder
-  #   echo "Adding to bin"
-  #   mkdir $out/bin
-  #   ln -s $out/opt/Vivado/${version}/bin/vivado $out/bin/vivado || true
-  #   ln -s $out/opt/SDK/${version}/bin/xsdk      $out/bin/xsdk || true
-  # '';
 
   meta = with lib; {
     description = "Xilinx Vivado";

@@ -66,9 +66,11 @@ FuseSoC handles the FPGA build. Vivado tools must be setup beforehand. From the
 repository root:
 
 ```
-source /path/to/vivado/settings64.sh
+module load xilinx/vivado/latest
+source venv/bin/activate
 fusesoc --cores-root=. run --target=synth --setup --build lowrisc:ibex:demo_system
 ```
+
 ## Programming FPGA
 To program FPGAs the user using Vivado typically needs to have permissions to access USB devices connected to the PC. Depending on your security policy you can take different steps to enable this access. One way of doing so is given in the udev rule outlined below.
 

@@ -1,18 +1,6 @@
 {
   description = "A template that shows all standard flake outputs";
 
-  # Inputs
-  # https://nixos.org/manual/nix/unstable/command-ref/new-cli/nix3-flake.html#flake-inputs
-
-  # The flake in the current directory.
-  # inputs.currentDir.url = ".";
-
-  # A flake in some other directory.
-  # inputs.otherDir.url = "/home/alice/src/patchelf";
-
-  # A flake in some absolute path
-  # inputs.otherDir.url = "path:/home/alice/src/patchelf";
-
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
     flake-utils.url = "github:numtide/flake-utils";
