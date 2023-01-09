@@ -30,7 +30,7 @@
             })];
         };
 
-        pythonEnv = pkgs.python3.withPackages(ps: with ps; [ pip fusesoc edalize ]);
+        pythonEnv = pkgs.python3.withPackages(ps: with ps; [ pip fusesoc edalize pyyaml ]);
         # Currently we don't build the riscv-toolchain from src, we use a github release
         # (See ./dependencies/riscv-gcc-toolchain-lowrisc.nix)
         # riscv-gcc-toolchain-lowrisc-src = pkgs.callPackage ./dependencies/riscv_gcc.nix { riscv-arch = "rv32imc"; };
