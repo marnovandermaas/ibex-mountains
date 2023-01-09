@@ -1,0 +1,53 @@
+{
+  "nodes": {
+    "lowrisc_edalize_src": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1672846808,
+        "narHash": "sha256-TTDUmfVBs2IKZQL7OWbZY3sIsdO/x/WaiqRKQJUXWug=",
+        "path": "/home/harry/projects/edalize/",
+        "type": "path"
+      },
+      "original": {
+        "path": "/home/harry/projects/edalize/",
+        "type": "path"
+      }
+    },
+    "lowrisc_fusesoc_src": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1670862599,
+        "narHash": "sha256-gR26SScgdr7x9mFMWGldSkL+zGPTjK9GMbUqt164xX8=",
+        "path": "/home/harry/projects/fusesoc/",
+        "type": "path"
+      },
+      "original": {
+        "path": "/home/harry/projects/fusesoc/",
+        "type": "path"
+      }
+    },
+    "nixpkgs": {
+      "locked": {
+        "lastModified": 1673180965,
+        "narHash": "sha256-gMhL6w9RVluvPs+irJ9n0Q1BphZm+Ek4XGn5Ow7YQ3k=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "0c9aadc8eff6daaa5149d2df9e6c49baaf44161c",
+        "type": "github"
+      },
+      "original": {
+        "id": "nixpkgs",
+        "type": "indirect"
+      }
+    },
+    "root": {
+      "inputs": {
+        "lowrisc_edalize_src": "lowrisc_edalize_src",
+        "lowrisc_fusesoc_src": "lowrisc_fusesoc_src",
+        "nixpkgs": "nixpkgs"
+      }
+    }
+  },
+  "root": "root",
+  "version": 7
+}

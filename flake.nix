@@ -4,16 +4,36 @@
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
     flake-utils.url = "github:numtide/flake-utils";
+    deps = {
+      url = "path:./dependencies";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
-  outputs = all@{ self, nixpkgs, flake-utils, ... }:
+  outputs = all@{ self, nixpkgs, flake-utils, deps, ... }:
 
     (flake-utils.lib.eachDefaultSystem (system:
       let
         pkgs = import nixpkgs {
           inherit system;
           config = { allowUnfree = true; };
+          overlays =
+            [ # Add the extra packages we might need
+              # Currently this contains the lowrisc riscv-toolchain, and spike
+              deps.overlay_pkgs
+              # Add all the python packages we need that aren't in nixpkgs
+              # (See the ./dependencies folder for more info)
+              (final: prev: {
+              python3 = prev.python3.override {
+                packageOverrides = deps.overlay_python;
+              };
+            })];
         };
+
+        pythonEnv = pkgs.python3.withPackages(ps: with ps; [ pip fusesoc edalize ]);
+        # Currently we don't build the riscv-toolchain from src, we use a github release
+        # (See ./dependencies/riscv-gcc-toolchain-lowrisc.nix)
+        # riscv-gcc-toolchain-lowrisc-src = pkgs.callPackage ./dependencies/riscv_gcc.nix { riscv-arch = "rv32imc"; };
 
         # Using requireFile prevents rehashing each time,
         # This saves much seconds during rebuilds.
@@ -36,7 +56,11 @@
               $ nix-prefetch-url --type sha256 --print-path file:</path/to/${name}>
           '';
         };
+
         vivado = pkgs.callPackage (import ./vivado.nix) {
+          # We need to prepare the pre-downloaded installer to
+          # execute within a nix build. Make use of the included java deps,
+          # but we still need to do a little patching to make it work.
           vivado-src = pkgs.stdenv.mkDerivation rec {
             pname = "vivado_src";
             version = "2022.2";
@@ -54,6 +78,7 @@
             '';
           };
         };
+
       in {
         packages.dockertest = pkgs.dockerTools.buildImage {
           name = "hello-docker";
@@ -67,10 +92,22 @@
           };
         };
         packages.src1 = vivado;
-        devShells.vivadotest = pkgs.mkShell {
+        devShells.labenv = pkgs.mkShell {
+          name = "labenv";
           buildInputs = [
             vivado
-          ];
+            pythonEnv
+          ] ++ (with pkgs; [
+            cmake
+            openocd
+            screen
+            verilator
+            riscv-gcc-toolchain-lowrisc
+          ]);
+          shellHook = ''
+            # Works on Ubuntu, may not on other distros. FIXME
+            export LOCALE_ARCHIVE=/usr/lib/locale/locale-archive
+          '';
         };
       })
     ) // {
