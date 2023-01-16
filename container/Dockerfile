@@ -106,7 +106,7 @@ USER dev:dev
 # Install Python Packages.
 ENV PATH "/home/dev/.local/bin:${PATH}"
 COPY --chown=dev:dev python-requirements.txt /tmp/python-requirements.txt
-RUN python3 -m pip install --user -U pip setuptools \
+RUN python3 -m pip install --user -U pip setuptools==58.2.0 \
     && python3 -m pip install --user -r /tmp/python-requirements.txt \
         --no-warn-script-location \
     && rm -f /tmp/python-requirements.txt
