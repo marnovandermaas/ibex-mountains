@@ -65,6 +65,25 @@ RUN curl -f -Ls -o verible.tar.gz \
     && tar -C /tools/verible -xf verible.tar.gz --strip-components=1
 ENV PATH "/tools/verible/bin:${PATH}"
 
+# Install openFPGALoader
+RUN curl -f -Ls -o openfpgaloader.tar.gz \
+    https://github.com/trabucayre/openFPGALoader/releases/download/v0.10.0/ubtuntu20.04-openFPGALoader.tgz
+    #&& mkdir -p /tools/openfpgaloader \
+RUN tar -C / -xf openfpgaloader.tar.gz --strip-components=1
+#ENV PATH "/tools/openfpgaloader/usr/local/bin:${PATH}"
+
+# Build OpenOCD
+RUN git clone https://github.com/openocd-org/openocd.git \
+    && cd openocd \
+    && git checkout v0.11.0 \
+    && ./bootstrap \
+    && ./configure \
+    && make \
+    && mkdir -p /tools/openocd \
+    && cp -r src /tools/openocd \
+    && cd ..
+ENV PATH "/tools/openocd/src:$PATH"
+
 # Set Locale to utf-8 everywhere
 ENV LC_ALL en_US.UTF-8
 ENV LANG en_US.UTF-8
