@@ -9,6 +9,36 @@ create_clock -period 100.000 -name tck_i -waveform {0.000 50.000} [get_ports tck
 ## Reset
 set_property -dict { PACKAGE_PIN T5 IOSTANDARD LVCMOS33 } [get_ports {nrst_btn}]
 
+## Raspberry Pi Hat
+set_property -dict { PACKAGE_PIN L13 IOSTANDARD LVCMOS33 } [get_ports {rpi_gpio[0]}];
+set_property -dict { PACKAGE_PIN M16 IOSTANDARD LVCMOS33 } [get_ports {rpi_gpio[1]}];
+set_property -dict { PACKAGE_PIN N15 IOSTANDARD LVCMOS33 } [get_ports {rpi_gpio[2]}];
+set_property -dict { PACKAGE_PIN K17 IOSTANDARD LVCMOS33 } [get_ports {rpi_gpio[3]}];
+set_property -dict { PACKAGE_PIN L18 IOSTANDARD LVCMOS33 } [get_ports {rpi_gpio[4]}];
+set_property -dict { PACKAGE_PIN M14 IOSTANDARD LVCMOS33 } [get_ports {rpi_gpio[5]}];
+set_property -dict { PACKAGE_PIN P18 IOSTANDARD LVCMOS33 } [get_ports {rpi_gpio[6]}];
+set_property -dict { PACKAGE_PIN L14 IOSTANDARD LVCMOS33 } [get_ports {rpi_gpio[7]}];
+set_property -dict { PACKAGE_PIN L16 IOSTANDARD LVCMOS33 } [get_ports {rpi_gpio[8]}];
+set_property -dict { PACKAGE_PIN N14 IOSTANDARD LVCMOS33 } [get_ports {rpi_gpio[9]}];
+set_property -dict { PACKAGE_PIN N16 IOSTANDARD LVCMOS33 } [get_ports {rpi_gpio[10]}];
+set_property -dict { PACKAGE_PIN V16 IOSTANDARD LVCMOS33 } [get_ports {rpi_gpio[11]}];
+set_property -dict { PACKAGE_PIN V17 IOSTANDARD LVCMOS33 } [get_ports {rpi_gpio[12]}];
+set_property -dict { PACKAGE_PIN L15 IOSTANDARD LVCMOS33 } [get_ports {rpi_gpio[13]}];
+set_property -dict { PACKAGE_PIN P17 IOSTANDARD LVCMOS33 } [get_ports {rpi_gpio[14]}];
+set_property -dict { PACKAGE_PIN V15 IOSTANDARD LVCMOS33 } [get_ports {rpi_gpio[15]}];
+set_property -dict { PACKAGE_PIN R11 IOSTANDARD LVCMOS33 } [get_ports {rpi_gpio[16]}];
+set_property -dict { PACKAGE_PIN U17 IOSTANDARD LVCMOS33 } [get_ports {rpi_gpio[17]}];
+set_property -dict { PACKAGE_PIN T15 IOSTANDARD LVCMOS33 } [get_ports {rpi_gpio[18]}];
+set_property -dict { PACKAGE_PIN T13 IOSTANDARD LVCMOS33 } [get_ports {rpi_gpio[19]}];
+set_property -dict { PACKAGE_PIN U14 IOSTANDARD LVCMOS33 } [get_ports {rpi_gpio[20]}];
+set_property -dict { PACKAGE_PIN V10 IOSTANDARD LVCMOS33 } [get_ports {rpi_gpio[21]}];
+set_property -dict { PACKAGE_PIN R13 IOSTANDARD LVCMOS33 } [get_ports {rpi_gpio[22]}];
+set_property -dict { PACKAGE_PIN V14 IOSTANDARD LVCMOS33 } [get_ports {rpi_gpio[23]}];
+set_property -dict { PACKAGE_PIN T9 IOSTANDARD LVCMOS33 } [get_ports {rpi_gpio[24]}];
+set_property -dict { PACKAGE_PIN R15 IOSTANDARD LVCMOS33 } [get_ports {rpi_gpio[25]}];
+set_property -dict { PACKAGE_PIN T10 IOSTANDARD LVCMOS33 } [get_ports {rpi_gpio[26]}];
+set_property -dict { PACKAGE_PIN V11 IOSTANDARD LVCMOS33 } [get_ports {rpi_gpio[27]}];
+
 ## General purpose LEDs
 set_property -dict { PACKAGE_PIN B13 IOSTANDARD LVCMOS33 } [get_ports {led_user[0]}];
 set_property -dict { PACKAGE_PIN B14 IOSTANDARD LVCMOS33 } [get_ports {led_user[1]}];

@@ -14,6 +14,8 @@ module top_sonata (
   output logic       led_legacy,
   output logic [8:0] led_cherierr,
 
+  output logic [27:0] rpi_gpio,
+
   input  logic [4:0] nav_sw,
   input  logic [7:0] user_sw,
 
@@ -68,7 +70,7 @@ module top_sonata (
   ibex_demo_system #(
     .GpiWidth(13),
     .GpoWidth(12),
-    .PwmWidth(12),
+    .PwmWidth(11),
     .SRAMInitFile(SRAMInitFile)
   ) u_ibex_demo_system (
     .clk_sys_i(clk_sys),
@@ -80,7 +82,7 @@ module top_sonata (
     .uart_rx_i(ser0_rx),
     .uart_tx_o(ser0_tx),
 
-    .pwm_o({led_cherierr, led_legacy, led_cheri, led_halted}),
+    .pwm_o({led_cherierr[8:1], led_legacy, led_cheri, led_halted}),
 
     .spi_rx_i(1'b0),
     .spi_tx_o(lcd_copi),
@@ -92,6 +94,26 @@ module top_sonata (
     .td_i,
     .td_o
   );
+
+  logic [31:0] counter;
+  logic pulse_output;
+
+  always_ff @(posedge clk_sys) begin
+    if (!rst_sys_n) begin
+      pulse_output <= 1'b1;
+      counter <= 5000000;
+    end else begin
+      if (counter == 0) begin
+        counter <= 5000000;
+        pulse_output = ~pulse_output;
+      end else begin
+        counter <= counter - 1;
+      end
+    end
+  end
+
+  assign led_cherierr[0] = pulse_output;
+  assign rpi_gpio = {28{pulse_output}};
 
   // Produce 50 MHz system clock from 25 MHz Sonata board clock
   clkgen_sonata clkgen(
